@@ -1,0 +1,47 @@
+version: "3.7"
+
+services:
+  frontend: 
+    depends_on:
+      - backend
+    build: 
+      context: classificados-frontend/.
+      dockerfile: Dockerfile
+    volumes:
+      - '.:/app'
+      - '/app/node_modules'
+    ports:
+      - 80:80
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+  backend:
+    restart: always
+    build: ./classficados-backend/.
+    networks:
+      - api-network
+    ports:
+      - 8081:8081
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    container_name: db
+    networks:
+      - api-network
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_DB: "spedy-classificados"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+
+networks:
+  api-network:
+    driver: bridge
